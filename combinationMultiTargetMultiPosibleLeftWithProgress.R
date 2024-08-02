@@ -1,5 +1,3 @@
-
-
 # Install cowplot package if not already installed
 # install.packages("cowplot")
 
@@ -46,8 +44,9 @@ run_qpadm_all_combinations <- function(prefix_ho, left_initial, right, target) {
       mutate(target = target)
     
     if (all(weights_data$weight >= 0)) {
+      num_left <- length(left)
       current_p_value <- result$popdrop %>%
-        filter(pat %in% c("000000000", "00000000", "0000000", "000000", "00000", "0000", "000", "00", "0")) %>%
+        filter(pat %in% sapply(1:num_left, function(x) paste0(rep("0", x), collapse = ""))) %>%
         pull(p)
       
       current_avg_se <- mean(weights_data$se)
@@ -82,6 +81,10 @@ run_qpadm_all_combinations <- function(prefix_ho, left_initial, right, target) {
   
   valid_results
 }
+
+# Record start time
+start_time <- Sys.time()
+cat("Start time:", start_time, "\n")
 
 # Setup parallel backend
 plan(multisession, workers = parallel::detectCores() - 1)
@@ -160,3 +163,7 @@ print("avg_se_check:")
 print(avg_se_check)
 print("right_populations_check:")
 print(right_populations_check)
+
+# Record end time
+end_time <- Sys.time()
+cat("End time:", end_time, "\n")
