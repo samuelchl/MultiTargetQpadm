@@ -17,3 +17,5 @@
 - create the folder before generating the plot
 
 The other files are just different attempts to do the same thing
+
+Be aware of the path of the input datasets in the beginning of the scripts and the paths of the output also in the scripts
