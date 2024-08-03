@@ -143,12 +143,35 @@ results <- future_map(1:nrow(combinations), function(i) {
 # Filter out NULL results
 valid_results <- Filter(Negate(is.null), results)
 
+# Separate valid and invalid results
+valid_results_filtered <- list()
+best_invalid_results <- list()
+
+for (target in targets) {
+  target_results <- Filter(function(res) res$weights_data$target == target, valid_results)
+  
+  if (length(target_results) > 0) {
+    valid_target_results <- Filter(function(res) res$p_value >= 0.05 && res$avg_se <= 0.05, target_results)
+    
+    if (length(valid_target_results) > 0) {
+      valid_results_filtered <- append(valid_results_filtered, valid_target_results)
+    } else {
+      best_invalid_result <- target_results[[which.max(sapply(target_results, function(res) res$p_value))]]
+      best_invalid_result <- target_results[[which.min(sapply(target_results, function(res) res$avg_se))]]
+      best_invalid_results <- append(best_invalid_results, list(best_invalid_result))
+    }
+  }
+}
+
+# Combine valid results and best invalid results
+final_results <- if (length(valid_results_filtered) > 0) valid_results_filtered else best_invalid_results
+
 # Combine results for each target
-all_weights_data <- bind_rows(lapply(valid_results, `[[`, "weights_data"))
+all_weights_data <- bind_rows(lapply(final_results, `[[`, "weights_data"))
 
 # Flatten the p_value and avg_se dictionaries to single values
-p_values_dict <- setNames(sapply(valid_results, function(res) res$p_value), sapply(valid_results, function(res) res$weights_data$target[1]))
-avg_se_dict <- setNames(sapply(valid_results, function(res) res$avg_se), sapply(valid_results, function(res) res$weights_data$target[1]))
+p_values_dict <- setNames(sapply(final_results, function(res) res$p_value), sapply(final_results, function(res) res$weights_data$target[1]))
+avg_se_dict <- setNames(sapply(final_results, function(res) res$avg_se), sapply(final_results, function(res) res$weights_data$target[1]))
 
 # Debugging: Print dictionaries to ensure all targets are included
 log_message("p_values_dict:")
