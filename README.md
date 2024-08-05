@@ -1,3 +1,4 @@
+# fixed right + dynamic left
 1 - Go to this script to prepare data combinationMultiTargetMultiPosibleLeftWithProgress.R
 
 2 - Edit the Right field, the left field and the targets field as you like
@@ -19,3 +20,11 @@
 The other files are just different attempts to do the same thing
 
 Be aware of the path of the input datasets in the beginning of the scripts and the paths of the output also in the scripts
+
+# dynamic right + dynamic left
+
+Same as previous category
+
+generate data with comboMultiRightLeftTargets.R
+
+and generate plot with MultiRightGeneratePlotFromCsvLargeData
