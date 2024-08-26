@@ -19,7 +19,7 @@ p_values_path <- "c:/qpadmdata/p_values.csv"
 avg_se_path <- "c:/qpadmdata/avg_se.csv"
 right_populations_path <- "c:/qpadmdata/right_populations.csv"
 rejection_log_path <- "c:/qpadmdata/rejection_log.csv"
-db_path <- "c:/qpadmdata/qpadmdata.db"
+db_path <- "c:/qpadmdata/qpadmdata2.db"
 
 # Input strings for right and left populations
 input_string_left_static <- "Lebanon_MBA.SG,CanaryIslands_Guanche.SG,Italy_PianSultano_BA.SG"
@@ -193,7 +193,7 @@ convert_existing_results <- function(existing_result, model_id, right_id) {
 # Function to process a single combination and save to the database
 process_combination <- function(prefix_ho, left, right, target, model_id, right_id) {
   con <- dbConnect(SQLite(), dbname = db_path)
-  
+  dbExecute(con, "PRAGMA journal_mode = WAL;")
   # Check if the request already exists
   existing_request <- check_existing_request(con, left, right, target)
   if (nrow(existing_request) > 0) {
@@ -275,6 +275,7 @@ calculate_combinations_count <- function(dynamic_population) {
 
 # Create SQLite database and tables if they don't exist
 con <- dbConnect(SQLite(), dbname = db_path)
+dbExecute(con, "PRAGMA journal_mode = WAL;")
 dbExecute(con, "CREATE TABLE IF NOT EXISTS left_populations (id INTEGER PRIMARY KEY, left_combination TEXT)")
 dbExecute(con, "CREATE TABLE IF NOT EXISTS right_populations (id INTEGER PRIMARY KEY, right_combination TEXT)")
 dbExecute(con, "CREATE TABLE IF NOT EXISTS request (id INTEGER PRIMARY KEY, left_id INTEGER, right_id INTEGER, target TEXT, FOREIGN KEY(left_id) REFERENCES left_populations(id), FOREIGN KEY(right_id) REFERENCES right_populations(id))")
@@ -317,6 +318,7 @@ right_combinations_df <- right_combination_ids %>%
 
 # Check for existing results and fetch them from the database if they exist
 con <- dbConnect(SQLite(), dbname = db_path)
+dbExecute(con, "PRAGMA journal_mode = WAL;")
 existing_results <- list()
 new_combinations <- list()
 for (i in 1:nrow(combinations)) {
