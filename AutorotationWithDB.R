@@ -21,6 +21,51 @@ right_populations_path <- "c:/qpadmdata/right_populations.csv"
 rejection_log_path <- "c:/qpadmdata/rejection_log.csv"
 db_path <- "c:/qpadmdata/qpadmdata2.db"
 
+# Function to check if required files exist with specific extensions
+check_required_files <- function(prefix) {
+  extensions <- c(".snp", ".anno", ".geno", ".ind")
+  missing_files <- sapply(extensions, function(ext) {
+    file_path <- paste0(prefix, ext)
+    if (!file.exists(file_path)) {
+      return(file_path)
+    } else {
+      return(NULL)
+    }
+  })
+  
+  missing_files <- missing_files[!sapply(missing_files, is.null)]
+  
+  if (length(missing_files) > 0) {
+    stop(paste("Error: The following required files are missing:", paste(missing_files, collapse = ", ")))
+  }
+}
+
+# Function to ensure a directory exists, create it if not
+ensure_dir_exists <- function(file_path) {
+  dir_path <- dirname(file_path)
+  if (!dir.exists(dir_path)) {
+    dir.create(dir_path, recursive = TRUE)
+    message(paste("Created directory:", dir_path))
+  }
+}
+
+# Check if the required prefix_ho files exist
+check_required_files(prefix_ho)
+
+# Ensure the directories for the other files exist
+ensure_dir_exists(progress_log_path)
+ensure_dir_exists(ongoingCombinationProgress_log_path)
+ensure_dir_exists(all_weights_data_path)
+ensure_dir_exists(p_values_path)
+ensure_dir_exists(avg_se_path)
+ensure_dir_exists(right_populations_path)
+ensure_dir_exists(rejection_log_path)
+ensure_dir_exists(db_path)
+
+
+# If the script reaches this point, all checks have passed
+log_message("File and directory checks passed. Proceeding with the script.")
+
 # Input strings for right and left populations
 input_string_left_static <- "Lebanon_MBA.SG,CanaryIslands_Guanche.SG,Italy_PianSultano_BA.SG"
 input_string_left_dynamic <- "Tajikistan_Ksirov_Kushan"
