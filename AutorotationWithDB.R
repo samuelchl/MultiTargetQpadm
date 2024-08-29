@@ -21,6 +21,25 @@ right_populations_path <- "c:/qpadmdata/right_populations.csv"
 rejection_log_path <- "c:/qpadmdata/rejection_log.csv"
 db_path <- "c:/qpadmdata/qpadmdata2.db"
 
+# Function to determine if in main thread
+is_main_thread <- function() {
+  Sys.getenv("RSTUDIO_SESSION_PORT") == ""
+}
+
+
+# Custom logging function
+log_message <- function(message) {
+  main_thread <- if (is_main_thread()) "MainThread" else "WorkerThread"
+  workers_count <- future::nbrOfWorkers()
+  timestamp <- Sys.time()
+  if (is.vector(message) && length(message) > 1) {
+    message <- paste(message, collapse = ", ")
+  }
+  message <- paste("][Time:", timestamp, "]", as.character(message))
+  print(paste(message, "\n"))
+  write(message, file = progress_log_path, append = TRUE, sep = "\n")
+}
+
 # Function to check if required files exist with specific extensions
 check_required_files <- function(prefix) {
   extensions <- c(".snp", ".anno", ".geno", ".ind")
@@ -45,9 +64,11 @@ ensure_dir_exists <- function(file_path) {
   dir_path <- dirname(file_path)
   if (!dir.exists(dir_path)) {
     dir.create(dir_path, recursive = TRUE)
-    message(paste("Created directory:", dir_path))
+    log_message(paste("Created directory:", dir_path))
   }
 }
+
+
 
 # Check if the required prefix_ho files exist
 check_required_files(prefix_ho)
@@ -67,8 +88,8 @@ ensure_dir_exists(db_path)
 log_message("File and directory checks passed. Proceeding with the script.")
 
 # Input strings for right and left populations
-input_string_left_static <- "Lebanon_MBA.SG,CanaryIslands_Guanche.SG,Italy_PianSultano_BA.SG"
-input_string_left_dynamic <- "Tajikistan_Ksirov_Kushan"
+input_string_left_static <- "Lebanon_MBA.SG"
+input_string_left_dynamic <- "Tajikistan_Ksirov_Kushan,CanaryIslands_Guanche.SG,Italy_PianSultano_BA.SG"
 input_string_right_static <- "Mbuti.DG,Israel_PPNB,Russia_MA1_HG.SG,Turkey_Boncuklu_N,Turkey_Epipaleolithic,Morocco_Iberomaurusian,Serbia_IronGates_Mesolithic,Luxembourg_Loschbour.DG,Russia_Karelia_HG,Georgia_Kotias.SG,Iran_GanjDareh_N,China_Tianyuan,Indian_GreatAndaman_100BP.SG,Mongolia_North_N"
 input_string_right_dynamic <- "Jordan_PPNB,Russia_Tyumen_HG,Israel_Natufian"
 
@@ -102,23 +123,7 @@ clear_log_file(ongoingCombinationProgress_log_path)
 clear_log_file(rejection_log_path)
 clear_log_file(right_populations_path)
 
-# Function to determine if in main thread
-is_main_thread <- function() {
-  Sys.getenv("RSTUDIO_SESSION_PORT") == ""
-}
 
-# Custom logging function
-log_message <- function(message) {
-  main_thread <- if (is_main_thread()) "MainThread" else "WorkerThread"
-  workers_count <- future::nbrOfWorkers()
-  timestamp <- Sys.time()
-  if (is.vector(message) && length(message) > 1) {
-    message <- paste(message, collapse = ", ")
-  }
-  message <- paste("][Time:", timestamp, "]", as.character(message))
-  print(paste(message, "\n"))
-  write(message, file = progress_log_path, append = TRUE, sep = "\n")
-}
 
 log_message2 <- function(prefix_ho, left, right, target) {
   main_thread <- if (is_main_thread()) "MainThread" else "WorkerThread"
