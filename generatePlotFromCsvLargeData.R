@@ -5,12 +5,21 @@ library(readr)
 library(gridExtra)
 library(grid)
 library(ggtext)  # Load ggtext for formatted text
+library(stringr)
 
 # Load the data
 all_weights_data <- read_csv('c:/qpadmdata/all_weights_data.csv')
 p_values_df <- read_csv('c:/qpadmdata/p_values.csv')
 avg_se_df <- read_csv('c:/qpadmdata/avg_se.csv')
 right_populations_df <- read_csv('c:/qpadmdata/right_populations.csv')
+
+# Define the include and exclude filter criteria as comma-separated strings
+include_filter <- ""  # Example: "Ashke,Jew" will filter for targets that contain 'Ashke' or 'Jew'
+exclude_filter <- ""  # Example: "France,Germany,Lebanon" will exclude these patterns
+
+# Split the include and exclude filters into vectors of patterns
+include_patterns <- unlist(strsplit(include_filter, ","))
+exclude_patterns <- unlist(strsplit(exclude_filter, ","))
 
 # Convert the right populations to a single string
 right <- paste(right_populations_df$right, collapse = ", ")
@@ -42,6 +51,26 @@ custom_labeller <- function(target) {
   }
 }
 
+
+# Apply the include filter if it's not empty and contains valid patterns
+if (!is.null(include_patterns) && length(include_patterns) > 0 && all(include_patterns != "")) {
+  # Create a combined regex pattern for inclusion
+  combined_include_pattern <- paste(include_patterns, collapse = "|")
+  
+  all_weights_data <- all_weights_data %>%
+    filter(grepl(combined_include_pattern, target))  # Include rows matching any pattern
+}
+
+# Apply the exclude filter for multiple patterns if it's not empty and contains valid patterns
+if (!is.null(exclude_patterns) && length(exclude_patterns) > 0 && all(exclude_patterns != "")) {
+  # Create a combined regex pattern for exclusion
+  combined_exclude_pattern <- paste(exclude_patterns, collapse = "|")
+  
+  all_weights_data <- all_weights_data %>%
+    filter(!grepl(combined_exclude_pattern, target))  # Exclude rows matching any pattern
+}
+
+
 # Add custom labels to the data
 all_weights_data <- all_weights_data %>%
   mutate(label = sapply(target, custom_labeller))
@@ -56,7 +85,7 @@ plot <- ggplot(all_weights_data, aes(y = label, x = weight, fill = population)) 
   geom_bar(stat = "identity", position = "stack") +
   geom_text(aes(label = paste0(scales::percent(weight), "\n(SE: ", round(se, 4), ")")), 
             position = position_stack(vjust = 0.5), size = 2.2) +  # Reduce font size for text inside bars
-  scale_x_continuous(expand = c(0, 0), limits = c(0, 1)) +
+  scale_x_continuous(expand = c(0, 0), limits = c(0, 1.01)) +
   labs(x = "Weight", y = NULL, title = "Population Weights for Targets") +
   theme_minimal() +
   theme(legend.position = "bottom",
@@ -64,7 +93,8 @@ plot <- ggplot(all_weights_data, aes(y = label, x = weight, fill = population)) 
         axis.ticks.x = element_blank(),
         axis.text.y = element_markdown(size = 8),  # Reduced text size for y-axis labels
         axis.ticks.y = element_blank(),
-        plot.margin = unit(c(1, 1, 1, 5), "lines"))  # Increase left margin
+        plot.margin = unit(c(1, 1, 1, 5), "lines")) +
+  guides(fill = guide_legend(ncol = 3))  # Limit the number of columns in the legend to 3# Increase left margin # Increase left margin
 
 # Generate the right label text
 right_label_text <- paste("Right Populations:\n", paste(strwrap(paste(right, collapse = ", "), width = 130), collapse = "\n"))

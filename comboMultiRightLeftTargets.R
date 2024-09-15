@@ -53,7 +53,7 @@ clear_log_file <- function(file_path) {
 clear_log_file(progress_log_path)
 clear_log_file(ongoingCombinationProgress_log_path)
 clear_log_file(rejection_log_path)
-clear_log_file(right_populations_path)
+#clear_log_file(right_populations_path)
 
 # Function to determine if in main thread
 is_main_thread <- function() {

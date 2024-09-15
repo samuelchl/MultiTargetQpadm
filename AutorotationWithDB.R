@@ -88,10 +88,10 @@ ensure_dir_exists(db_path)
 log_message("File and directory checks passed. Proceeding with the script.")
 
 # Input strings for right and left populations
-input_string_left_static <- "Lebanon_MBA.SG"
-input_string_left_dynamic <- "Tajikistan_Ksirov_Kushan,CanaryIslands_Guanche.SG,Italy_PianSultano_BA.SG"
-input_string_right_static <- "Mbuti.DG,Israel_PPNB,Russia_MA1_HG.SG,Turkey_Boncuklu_N,Turkey_Epipaleolithic,Morocco_Iberomaurusian,Serbia_IronGates_Mesolithic,Luxembourg_Loschbour.DG,Russia_Karelia_HG,Georgia_Kotias.SG,Iran_GanjDareh_N,China_Tianyuan,Indian_GreatAndaman_100BP.SG,Mongolia_North_N"
-input_string_right_dynamic <- "Jordan_PPNB,Russia_Tyumen_HG,Israel_Natufian"
+input_string_left_static <- ""
+input_string_left_dynamic <- "Lebanon_MBA.SG,CanaryIslands_Guanche.SG,Italy_PianSultano_BA.SG,Tajikistan_Ksirov_Kushan,Syria_TellQarassa_Umayyad,France_Occitanie_EBA.SG,Syria_TellMasaikh_Medieval.SG,Greece_Delphi_BA_Mycenaean,Germany_BA.SG,Latvia_BA,Iran_DinkhaTepe_BA_IA_1"
+input_string_right_static <- "Mbuti.DG,Israel_PPNB,Russia_MA1_HG.SG,Turkey_Boncuklu_N,Turkey_Epipaleolithic,Morocco_Iberomaurusian,Serbia_IronGates_Mesolithic,Luxembourg_Loschbour.DG,Russia_Karelia_HG,Georgia_Kotias.SG,Iran_GanjDareh_N,China_Tianyuan,Indian_GreatAndaman_100BP.SG,Mongolia_North_N,Jordan_PPNB,Russia_Tyumen_HG,Israel_Natufian"
+input_string_right_dynamic <- ""
 
 left_static <- unlist(strsplit(input_string_left_static, split = ","))
 left_dynamic <- unlist(strsplit(input_string_left_dynamic, split = ","))
@@ -110,7 +110,7 @@ if (length(right_static) == 0 && length(right_dynamic) == 0) {
 }
 
 # List of target populations
-targets <- c("Jew_Ashkenazi.HO", "Jew_Moroccan.HO")
+targets <- c("Jew_Ashkenazi.HO", "Jew_Moroccan.HO", "Jew_Tunisian.HO", "Jew_Libyan.HO", "Jew_Yemenite.HO", "Jew_Iranian.HO", "Jew_Iraqi.HO", "Jew_Georgian.HO", "Jew_Turkish.HO","Lebanese.HO","Cypriot.HO","Palestinian.HO","Syrian.HO","Italian_South.HO","Italian_North.DG","Cretan.DG","Turkish.DG")
 
 # Function to clear a log file
 clear_log_file <- function(file_path) {
@@ -121,7 +121,7 @@ clear_log_file <- function(file_path) {
 clear_log_file(progress_log_path)
 clear_log_file(ongoingCombinationProgress_log_path)
 clear_log_file(rejection_log_path)
-clear_log_file(right_populations_path)
+#clear_log_file(right_populations_path)
 
 
 
@@ -387,6 +387,8 @@ for (i in 1:nrow(combinations)) {
   }
 }
 dbDisconnect(con)
+
+log_message(paste("Total new_combinations needing computation:", length(new_combinations)))
 
 # Process new combinations in parallel
 results <- future_map(new_combinations, function(row) {
